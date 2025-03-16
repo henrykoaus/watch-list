@@ -1,0 +1,207 @@
+<!-- Show Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <%= link_to "Back", lists_path, class: "btn btn-outline-secondary" %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <%= link_to "My Lists", lists_path, class: "nav-link" %>
+        </li>
+        <li class="nav-item">
+          <%= link_to "New List", new_list_path, class: "nav-link" %>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Show Banner -->
+<header class="bg-primary text-white text-center py-5", style="background-image: url('<%= asset_path("#{@list.category}.png") %>'); background-size: cover;
+               background-position: center;
+               background-repeat: no-repeat;">
+  <div class="container">
+    <h1><%= @list.name %></h1>
+  </div>
+</header>
+
+<!-- Bookmark Card -->
+<% if @list.bookmarks.any? %>
+  <div class="container my-5">
+    <div class="row g-4">
+      <% @list.bookmarks.each do |bookmark| %>
+        <div class="col-md-4">
+          <div class="card shadow-lg border-0 h-100">
+            <!-- Movie Poster -->
+            <%= image_tag bookmark.movie.poster_url, class: "card-img-top", alt: bookmark.movie.title, style: "height: 300px; object-fit: cover;" %>
+
+            <!-- Card Body -->
+            <div class="card-body d-flex flex-column justify-content-between">
+
+              <!-- Movie Title & Rating -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4 class="card-title m-0"><strong><%= bookmark.movie.title %></strong></h4>
+                <span class="badge bg-warning text-dark">⭐ <%= bookmark.movie.rating.round(2) %></span>
+              </div>
+
+              <!-- Movie Overview -->
+              <p class="card-text text-muted" style="font-size: 0.9rem;">
+                <%= truncate(bookmark.movie.overview, length: 120) %>
+              </p>
+
+              <!-- Bookmark Comment & Delete -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <% if bookmark.comment.present? %>
+                  <blockquote class="blockquote text-primary fst-italic">
+                    “<%= bookmark.comment %>”
+                  </blockquote>
+                <% end %>
+
+                <%= link_to bookmark_path(bookmark), method: :delete, data: { turbo_method: :delete, confirm: "Are you sure?" }, class: "text-danger text-decoration-none d-inline-flex align-items-center text-center gap-1" do %>
+                    🗑️ Delete
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <div class="container my-5", id="no-content">
+    <h2>No Bookmarks Yet</h2>
+  </div>
+<% end %>
+
+<!-- Review Section -->
+<div class="container mt-5">
+  <div class="row">
+    <!-- Left Column: Reviews List -->
+    <% if @list.reviews.any? %>
+      <div class="col-md-6">
+        <h4 class="mb-4">Reviews</h4>
+        <div class="list-group">
+          <% @list.reviews.each do |review| %>
+            <div class="list-group-item shadow-sm mb-3 p-3 rounded">
+              <p>
+                <% (1..5).each do |i| %>
+                  <i class="fa-star <%= i <= review.rating ? 'fas text-warning' : 'far text-secondary' %>"></i>
+                <% end %>
+                <strong><%= review.rating.round(1).to_i %> / 5</strong>
+              </p>
+              <p><%= review.comment %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="col-md-6", id="no-content">
+        <h5>No Reviews Yet</h5>
+      </div>
+    <% end %>
+
+    <!-- Right Column: Add Review Form -->
+    <div class="col-md-5">
+      <h4 class="mb-4">Add Your Review</h4>
+      <div class="card shadow-sm p-4">
+        <%= simple_form_for([@list, @list.reviews.build]) do |f| %>
+          <!-- Hidden Rating Input -->
+          <%= f.input :rating, as: :hidden, input_html: { id: "rating-input" } %>
+
+          <!-- Star Rating UI -->
+          <div class="mb-3">
+            <label>Rating:</label>
+            <div id="star-rating" class="d-flex gap-2">
+              <% (1..5).each do |i| %>
+                <i class="fa-star far text-secondary fs-3 star" data-value="<%= i %>"></i>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Comment Input -->
+          <div class="mb-3">
+            <%= f.input :comment, label: "Comment", as: :text, input_html: { rows: 3 } %>
+          </div>
+
+          <%= f.submit "Add", class: "btn btn-primary w-100" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include FontAwesome -->
+<%= content_tag :script, nil, src: "https://kit.fontawesome.com/a076d05399.js", crossorigin: "anonymous" %>
+
+<!-- JavaScript for Star Rating Interaction -->
+<script>
+document.addEventListener("turbo:load", function () {
+  const ratingInput = document.getElementById("rating-input");
+  const starContainer = document.getElementById("star-rating");
+
+  if (!ratingInput || !starContainer) {
+    console.error("Missing rating input or star container!");
+    return;
+  }
+
+  const stars = starContainer.querySelectorAll(".star");
+  let currentRating = 0;
+
+  // Unique storage key for the list
+  const listId = "<%= @list.id %>";
+
+  // Remove stored rating when user leaves the page
+  document.addEventListener("turbo:before-cache", function () {
+    localStorage.removeItem(`star-rating-${listId}`);
+  });
+
+  const savedRating = localStorage.getItem(`star-rating-${listId}`);
+
+  // If there's a valid saved rating, use it; otherwise, start with blank stars
+  if (savedRating && !isNaN(parseInt(savedRating, 10))) {
+    currentRating = parseInt(savedRating, 10);
+    ratingInput.value = currentRating;
+  } else {
+    ratingInput.value = ""; // Ensure it's blank initially
+  }
+
+  updateStars(currentRating); // Ensure stars start correctly
+
+  // Add click event to each star
+  stars.forEach(star => {
+    star.addEventListener("click", function () {
+      const value = parseInt(this.getAttribute("data-value"), 10);
+
+      if (currentRating === value) {
+        // Reset rating
+        currentRating = 0;
+        ratingInput.value = "";
+        localStorage.removeItem(`star-rating-${listId}`);
+      } else {
+        // Update rating
+        currentRating = value;
+        ratingInput.value = value;
+        localStorage.setItem(`star-rating-${listId}`, value);
+      }
+
+      updateStars(currentRating);
+    });
+  });
+
+  function updateStars(value) {
+    stars.forEach((star, index) => {
+      if (index < value) {
+        star.classList.remove("far", "text-secondary");
+        star.classList.add("fas", "text-warning");
+      } else {
+        star.classList.remove("fas", "text-warning");
+        star.classList.add("far", "text-secondary");
+      }
+    });
+  }
+});
+</script>
+
+<%= link_to "➕ Add Bookmark", new_list_bookmark_path(@list), class: "btn btn-outline-success btn-lg create-list-btn" %>

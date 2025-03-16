@@ -1,0 +1,55 @@
+<!-- Index Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">🍿</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <%= link_to "My Lists", lists_path, class: "nav-link" %>
+        </li>
+        <li class="nav-item">
+          <%= link_to "New List", new_list_path, class: "nav-link" %>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Index Banner -->
+<header class="bg-primary text-white text-center py-5", id="banner">
+  <div class="container pb-5">
+    <h1 style="color:black;">Customise Your Favorite Movies</h1>
+    <p class="lead", style="color:black;">Create your own movie lists and bookmark your movies.</p>
+  </div>
+</header>
+
+<!-- List Card -->
+<% if @lists.any? %>
+  <div class="container my-5">
+    <div class="row g-4">
+      <% @lists.each do |list| %>
+        <div class="col-md-4">
+          <%= link_to list_path(list), class: "text-decoration-none" do %>
+            <div class="card text-white shadow-lg border-0 category-card"
+                 style="background-image: url('<%= asset_path("#{list.category}.png") %>');">
+              <div class="card-img-overlay d-flex flex-column justify-content-center text-center rounded">
+                <h3 class="card-title"><%= list.name %></h3>
+                <p><%= list.category %></p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <div class="container my-5", id="no-content">
+    <h2>No Watch Lists Yet</h2>
+  </div>
+<% end %>
+
+<!-- Create List Button -->
+<%= link_to "➕ Create List", new_list_path, class: "btn btn-outline-primary btn-lg create-list-btn" %>

@@ -1,0 +1,10 @@
+<%= simple_form_for [@list, @bookmark] do |f| %>
+  <div class="form-group">
+    <%= f.association :movie, collection: Movie.all, label: "Choose a movie" %>
+  </div>
+  <div class="form-group">
+    <%= f.input :comment, label: "Comment (min 6 characters)" %>
+  </div>
+  <%= f.button :submit, "Add", class: "btn btn-primary" %>
+  <%= link_to "Back", list_path(@list), class: "btn btn-secondary" %>
+<% end %>

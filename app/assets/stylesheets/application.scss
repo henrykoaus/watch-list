@@ -1,0 +1,74 @@
+// Graphical variables
+@import "config/fonts";
+@import "config/colors";
+@import "config/bootstrap_variables";
+
+// External libraries
+@import "bootstrap";
+@import "font-awesome";
+
+// Your CSS partials
+@import "components/index";
+@import "pages/index";
+
+body {
+  background-color: #f8f9fa;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+
+.category-card {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-img-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.create-list-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 30px;
+  border-radius: 50px;
+  padding: 15px 20px;
+  font-size: 18px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#banner {
+  background: asset-url("Banner.jpg") no-repeat center center/cover;
+}
+
+#no-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.star {
+  cursor: pointer;
+  font-size: 2rem;
+  transition: color 0.2s ease;
+  pointer-events: auto;
+}
+
+.star:hover,
+.star:hover ~ .star {
+  color: gold;
+}
+
+.fas {
+  color: gold;
+}
